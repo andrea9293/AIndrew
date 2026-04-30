@@ -5,6 +5,10 @@ import process from "node:process";
 
 const skillInstalls = [
   {
+    repo: "https://github.com/andrea9293/andrea9293-skill",
+    skill: "telegram-notify",
+  },
+  {
     repo: "https://github.com/vercel-labs/skills",
     skill: "find-skills",
   },
