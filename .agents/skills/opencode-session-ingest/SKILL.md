@@ -21,6 +21,7 @@ Do not use this skill for single-source ingest from a URL/PDF/manual note. Use `
 - `SOURCE_PROJECT_PATH`: optional path containing OpenCode sessions. If omitted, default to the current working directory (`$PWD`, typically the workspace root).
 - `MAX_SESSIONS`: optional number of recent sessions (default: 8).
 - `MODE`: `recent` or `all`.
+- `UPDATED_WITHIN_HOURS`: fixed to `24` for this workflow. Only sessions updated in the last 24 hours are eligible.
 
 Default resolution rule:
 
@@ -48,6 +49,10 @@ Each session produces:
 
 ## Step 1: Session Inventory
 
+Hard constraint for this workflow:
+- Always consider only sessions whose update timestamp is within the last 24 hours.
+- `opencode session list` shows update time; use that value as the source of truth when filtering.
+
 From `SOURCE_PROJECT_PATH`:
 
 ```bash
@@ -58,6 +63,25 @@ If user requested recent only:
 
 ```bash
 opencode session list --format json -n <MAX_SESSIONS>
+```
+
+Then filter selected rows to keep only sessions updated in the last 24 hours (by the update-time field exposed by `opencode session list`).
+
+Example JSON filter (supports ISO strings or epoch timestamps):
+
+```bash
+opencode session list --format json \
+| jq '
+    def to_epoch_s:
+      if type == "number" then (if . > 20000000000 then . / 1000 else . end)
+      elif type == "string" then (fromdateiso8601? // 0)
+      else 0 end;
+    [ .[]
+      | . as $s
+      | (($s.updatedAt // $s.updated_at // $s.updated // $s.lastUpdated) | to_epoch_s) as $updated
+      | select($updated >= (now - 24*60*60))
+    ]
+  '
 ```
 
 ## Step 2: Export Sessions
@@ -151,5 +175,6 @@ Stage wiki changes with relevant raw source files for that ingest.
 
 - Transcript without role headers (`USER`/`ASSISTANT`) makes ingest quality worse.
 - Ingesting everything blindly pollutes the wiki.
+- Forgetting the 24h recency filter and exporting stale sessions.
 - Running multiple ingest subagents at once causes inconsistent curation decisions.
 - Committing unrelated files together with wiki ingest changes.
