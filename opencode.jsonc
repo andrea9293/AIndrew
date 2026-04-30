@@ -1,0 +1,24 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "main-agent",
+  "mcp": {
+    "documentation": {
+      "command": [
+        "npx",
+        "-y",
+        "@andrea9293/mcp-documentation-server"
+      ],
+      "type": "local",
+      "enabled": false
+    },
+    "exa": {
+      "type": "remote",
+      "url": "https://mcp.exa.ai/mcp",
+      "enabled": true
+    }
+  },
+  "plugin": [
+    // "opencode-scheduler",
+    "superpowers@git+https://github.com/obra/superpowers.git"
+  ]
+}
