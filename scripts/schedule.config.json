@@ -1,0 +1,11 @@
+{
+  "heartbeat": {
+    "cron": "*/15 * * * *"
+  },
+  "wiki-lint": {
+    "cron": "0 20 * * *"
+  },
+  "memory-ingest": {
+    "cron": "0 21 * * *"
+  }
+}

@@ -89,6 +89,69 @@ Typical first steps:
 - enable or disable MCP services in `opencode.jsonc`
 - adjust the installed skills to match your workflow
 
+## 5. Scheduled automation (heartbeat, wiki lint, memory ingest)
+
+The workspace includes three dedicated job runners:
+
+- `scripts/run-heartbeat.mjs`
+- `scripts/run-wiki-lint.mjs`
+- `scripts/run-memory-ingest.mjs`
+
+And one cross-platform scheduler manager:
+
+- `scripts/scheduler-control.mjs`
+
+Two subagents are also available in `.opencode/agents/`:
+
+- `heartbeat-agent` for heartbeat-only runs
+- `wiki-maintenance-agent` for wiki lint and memory ingest
+
+These subagents are configured as `mode: subagent`, so they are invocable with `@` mentions in OpenCode.
+
+### Default schedule
+
+The schedule is defined in `scripts/schedule.config.json` and is editable:
+
+- heartbeat: every 15 minutes (`*/15 * * * *`)
+- wiki lint: daily at 20:00 (`0 20 * * *`)
+- memory ingest: daily at 21:00 (`0 21 * * *`)
+
+### Enable or disable all schedules
+
+```bash
+node scripts/scheduler-control.mjs start all
+node scripts/scheduler-control.mjs stop all
+node scripts/scheduler-control.mjs status
+```
+
+### Enable or disable a single schedule
+
+```bash
+node scripts/scheduler-control.mjs start heartbeat
+node scripts/scheduler-control.mjs stop wiki-lint
+node scripts/scheduler-control.mjs status memory-ingest
+```
+
+### Per-job shortcuts
+
+Each runner can manage only its own schedule:
+
+```bash
+node scripts/run-heartbeat.mjs enable
+node scripts/run-heartbeat.mjs disable
+node scripts/run-heartbeat.mjs status
+
+node scripts/run-wiki-lint.mjs enable
+node scripts/run-memory-ingest.mjs enable
+```
+
+### Platform notes
+
+- Linux/macOS: uses user crontab
+- Windows: uses Task Scheduler via `schtasks`
+
+Schedules survive reboot once enabled.
+
 ## Philosophy
 
 AIndrew aims to be:
